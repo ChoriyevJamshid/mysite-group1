@@ -3,7 +3,9 @@ from django.utils import timezone
 from django.contrib.auth import get_user_model
 
 from blog.choices import PostStatus
+from blog.managers import PublishedManager
 from utils import BaseModel
+
 
 
 class Post(BaseModel):
@@ -19,6 +21,9 @@ class Post(BaseModel):
     status = models.CharField(max_length=15,
                               choices=PostStatus.choices,
                               default=PostStatus.DRAFT)
+
+    objects = models.Manager()
+    published = PublishedManager()
 
     class Meta:
         ordering = ['-publish']
