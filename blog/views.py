@@ -12,14 +12,13 @@ def post_list(request):
                   {'posts': posts})
 
 
-def post_detail(request, pk):
-    # try:
-    #     post = Post.published.get(pk=pk)
-    # except Post.DoesNotExist:
-    #     raise Http404("Post does not exist")
+def post_detail(request, year: int, month: int, day: int, slug: str):
 
     post = get_object_or_404(Post,
-                             pk=pk,
+                             slug=slug,
+                             publish__year=year,
+                             publish__month=month,
+                             publish__day=day,
                              status=PostStatus.PUBLISHED)
 
     return render(request,
