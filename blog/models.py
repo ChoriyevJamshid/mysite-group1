@@ -4,6 +4,8 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils.text import slugify
 
+from taggit.managers import TaggableManager
+
 
 from blog.choices import PostStatus
 from blog.managers import PublishedManager
@@ -23,6 +25,8 @@ class Post(BaseModel):
     status = models.CharField(max_length=15,
                               choices=PostStatus.choices,
                               default=PostStatus.DRAFT)
+
+    tags = TaggableManager()
 
     objects = models.Manager()
     published = PublishedManager()

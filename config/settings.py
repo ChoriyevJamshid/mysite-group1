@@ -31,7 +31,13 @@ LOCAL_APPS = [
     "blog.apps.BlogConfig",
 ]
 
+THIRD_PARTY_APPS = [
+    "taggit",
+]
+
+
 INSTALLED_APPS.extend(LOCAL_APPS)
+INSTALLED_APPS.extend(THIRD_PARTY_APPS)
 
 
 MIDDLEWARE = [

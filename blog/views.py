@@ -5,14 +5,20 @@ from django.core.mail import send_mail
 from django.conf import settings
 
 from django.views.generic import ListView
+from taggit.models import Tag
 
 from blog.models import Post, Comment
 from blog.choices import PostStatus
 from blog.forms import EmailPostForm, CommentForm
 
 
-def post_list(request):
+def post_list(request, tag_slug=None):
     posts = Post.published.all()
+
+    tag = None
+    if tag_slug:
+        tag = get_object_or_404(Tag, slug=tag_slug)
+        posts = posts.filter(tags__in=[tag])
 
     paginator = Paginator(posts, 5)
     page_number = request.GET.get('page', 1)
@@ -24,9 +30,14 @@ def post_list(request):
     except PageNotAnInteger:
         posts = paginator.page(1)
 
+    context = {
+        "posts": posts,
+        "tag": tag,
+    }
+
     return render(request,
                   'blog/post/list.html',
-                  {'posts': posts})
+                  context=context)
 
 
 def post_detail(request, year: int, month: int, day: int, slug: str):
@@ -111,7 +122,7 @@ def post_comment(request, post_id: int):
                "comment": comment}
 
     return render(request,
-                  'blog/comment.html',
+                  'blog/post/comment.html',
                   context=context)
 
 
