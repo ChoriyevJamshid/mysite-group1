@@ -1,13 +1,14 @@
 from django.shortcuts import render, get_object_or_404
+from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.mail import send_mail
 from django.conf import settings
 
 from django.views.generic import ListView
 
-from blog.models import Post
+from blog.models import Post, Comment
 from blog.choices import PostStatus
-from blog.forms import EmailPostForm
+from blog.forms import EmailPostForm, CommentForm
 
 
 def post_list(request):
@@ -36,9 +37,18 @@ def post_detail(request, year: int, month: int, day: int, slug: str):
                              publish__day=day,
                              status=PostStatus.PUBLISHED)
 
+    comments = post.comments.filter(active=True)
+    form = CommentForm()
+
+    context = {
+        "post": post,
+        "form": form,
+        "comments": comments,
+    }
+
     return render(request,
                   "blog/post/detail.html",
-                  {"post": post})
+                  context=context)
 
 
 def post_share(request, post_id: int):
@@ -81,6 +91,28 @@ def post_share(request, post_id: int):
                       'post': post,
                       'sent': sent
                   })
+
+
+@require_POST
+def post_comment(request, post_id: int):
+    post = get_object_or_404(Post,
+                             id=post_id,
+                             status=PostStatus.PUBLISHED)
+    comment = None
+
+    form = CommentForm(request.POST)
+    if form.is_valid():
+        comment = form.save(commit=False)
+        comment.post = post
+        comment.save()
+
+    context = {"post": post,
+               "form": form,
+               "comment": comment}
+
+    return render(request,
+                  'blog/comment.html',
+                  context=context)
 
 
 class PostListView(ListView):
